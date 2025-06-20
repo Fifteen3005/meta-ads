@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>H5归因优化</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Harmony -->
+    <!-- Application Structure Plan: A four-section, single-page dashboard (Current State, Problem Diagnosis, Solution Comparison, Implementation Path) with top navigation. This structure guides the user logically from understanding the problem to making a decision and seeing an action plan. It transforms a static report into an interactive decision-making tool. Key interaction is selecting a solution, which dynamically updates the implementation steps. -->
+    <!-- Visualization & Content Choices: Current State -> Donut Chart (Chart.js) for 5% data loss, shows proportion clearly. Problem Diagnosis -> HTML/CSS diagrams for process flows, lightweight and clear. Solution Comparison -> Side-by-side layout with CSS gauges for visual accuracy comparison and JS-powered selection for interactivity. Implementation -> Dynamic text blocks based on user choice. This approach uses the best tool for each piece of information without over-relying on complex libraries. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans SC', sans-serif;
+            background-color: #f8fafc;
+        }
+        .smooth-scroll {
+            scroll-behavior: smooth;
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #3b82f6;
+            border-bottom-color: #3b82f6;
+        }
+        .card {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        .solution-card {
+            border: 2px solid #e5e7eb;
+        }
+        .chart-container-small {
+            position: relative;
+            width: 180px;
+            height: 180px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+    </style>
+</head>
+<body class="smooth-scroll text-gray-800">
+
+    <header class="bg-white/80 backdrop-blur-sm sticky top-0 z-50 shadow-sm">
+        <div class="container mx-auto px-4">
+            <nav class="flex items-center justify-between h-16">
+                <h1 class="text-xl md:text-2xl font-bold text-gray-800">H5归因优化仪表盘</h1>
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#current-state" class="nav-link font-medium border-b-2 border-transparent pb-1">现状</a>
+                    <a href="#problem-diagnosis" class="nav-link font-medium border-b-2 border-transparent pb-1">问题诊断</a>
+                    <a href="#solution-comparison" class="nav-link font-medium border-b-2 border-transparent pb-1">方案对比</a>
+                    <a href="#implementation-path" class="nav-link font-medium border-b-2 border-transparent pb-1">实施路径</a>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8 md:py-12">
+
+        <section id="current-state" class="mb-16 md:mb-24 text-center">
+            <h2 class="text-3xl font-bold mb-4">当前归因现状</h2>
+            <p class="max-w-3xl mx-auto text-gray-600 mb-10">
+                当前我们主要通过两种并行的、均有缺陷的路径进行归因，这导致了数据丢失与不准确，直接影响我们对广告活动效果的评估。
+            </p>
+            <div class="card p-6 md:p-8">
+                <div class="flex flex-col md:flex-row items-center justify-between gap-8">
+                    <div class="w-full md:w-auto flex-grow space-y-8">
+                        <h3 class="text-xl font-semibold text-center md:text-left">核心归因流程</h3>
+                        <div>
+                            <h4 class="font-semibold text-gray-700 mb-3 text-base text-center md:text-left">路径一：手机号归因</h4>
+                             <div class="flex flex-wrap items-center justify-center md:justify-start gap-x-2 gap-y-4 text-sm">
+                                <div class="bg-blue-100 text-blue-800 rounded-full px-3 py-2 whitespace-nowrap">点击广告</div>
+                                <span class="text-gray-400 text-2xl font-light">→</span>
+                                <div class="bg-blue-100 text-blue-800 rounded-full px-3 py-2 whitespace-nowrap">落地页填手机号</div>
+                                <span class="text-gray-400 text-2xl font-light">→</span>
+                                <div class="bg-blue-100 text-blue-800 rounded-full px-3 py-2 whitespace-nowrap">跳转下载页</div>
+                                <span class="text-gray-400 text-2xl font-light">→</span>
+                                <div class="bg-green-100 text-green-800 rounded-full px-3 py-2 whitespace-nowrap">使用该手机号登录</div>
+                            </div>
+                            <p class="mt-3 text-gray-500 text-xs text-center md:text-left">说明：理想路径，但常因用户后续未使用同一手机号而失败。</p>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-700 mb-3 text-base text-center md:text-left">路径二：AF模糊归因</h4>
+                            <div class="flex flex-wrap items-center justify-center md:justify-start gap-x-2 gap-y-4 text-sm">
+                                <div class="bg-purple-100 text-purple-800 rounded-full px-4 py-2 whitespace-nowrap">点击广告</div>
+                                <span class="text-gray-400 text-2xl font-light">→</span>
+                                <div class="bg-purple-100 text-purple-800 rounded-full px-4 py-2 whitespace-nowrap">落地页填手机号A</div>
+                                <span class="text-gray-400 text-2xl font-light">→</span>
+                                <div class="bg-purple-100 text-purple-800 rounded-full px-4 py-2 whitespace-nowrap">跳转下载页</div>
+                                <span class="text-gray-400 text-2xl font-light">→</span>
+                                <div class="bg-red-100 text-red-800 rounded-full px-4 py-2 whitespace-nowrap">使用手机号B注册</div>
+                            </div>
+                            <p class="mt-3 text-gray-500 text-xs text-center md:text-left">说明：手机号不一致导致归因失败，此时依赖AF使用IP、UA等信息进行概率模型归因，精准度较低。</p>
+                        </div>
+                    </div>
+                    <div class="w-full md:w-auto flex-shrink-0 mt-8 md:mt-0">
+                        <h3 class="text-lg font-semibold mb-3 text-center">归因信息丢失率</h3>
+                        <div class="chart-container-small">
+                            <canvas id="attributionLossChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="problem-diagnosis" class="mb-16 md:mb-24">
+            <h2 class="text-3xl font-bold text-center mb-4">核心问题诊断</h2>
+            <p class="max-w-3xl mx-auto text-gray-600 mb-12 text-center">
+                我们的归因困境主要源于两大核心问题：依赖单一归因方式的脆弱性，以及归因数据流的不完整。
+            </p>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="card p-8">
+                    <div class="flex items-center mb-4">
+                        <span class="text-3xl mr-4">⚠️</span>
+                        <h3 class="text-xl font-semibold">问题一：手机号归因的脆弱性</h3>
+                    </div>
+                    <p class="text-gray-600 mb-6">依赖用户手机号匹配的归因方式极易失败，主要体现在两个方面：</p>
+                    <ul class="space-y-4">
+                        <li class="flex items-start">
+                            <span class="text-blue-500 font-bold mr-3 mt-1">●</span>
+                            <div>
+                                <h4 class="font-semibold">链接参数丢失</h4>
+                                <p class="text-gray-500 text-sm">用户在跳转过程中（如通过社交App），广告链接的追踪参数易被剥离，导致无法溯源Campaign。</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                             <span class="text-blue-500 font-bold mr-3 mt-1">●</span>
+                            <div>
+                                <h4 class="font-semibold">用户行为不一致</h4>
+                                <p class="text-gray-500 text-sm">用户在H5和App内使用不同手机号注册，将直接导致归因失败。</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                 <div class="card p-8">
+                    <div class="flex items-center mb-4">
+                         <span class="text-3xl mr-4">📉</span>
+                        <h3 class="text-xl font-semibold">问题二：AF归因数据缺失</h3>
+                    </div>
+                    <p class="text-gray-600 mb-6">当前“手机号优先，AF补位”的逻辑存在问题。由于我们未将广告点击数据系统性地回传给AF，当手机号归因失败时，AF也因缺少数据而无法准确归因。</p>
+                    <div class="p-4 bg-gray-100 rounded-lg">
+                         <h4 class="font-semibold text-center text-gray-700">当前数据流（有断点）</h4>
+                         <div class="mt-4 flex flex-wrap items-center justify-center gap-x-2 gap-y-4 text-sm">
+                             <div class="bg-blue-100 text-blue-800 rounded-full px-4 py-2 whitespace-nowrap">广告点击</div>
+                             <span class="text-gray-400 text-2xl font-light">→</span>
+                             <div class="text-center">
+                                 <div class="bg-red-100 text-red-800 rounded-full px-4 py-2 whitespace-nowrap">数据未传至AF</div>
+                                 <p class="text-xs text-red-600 mt-1">断点</p>
+                             </div>
+                             <span class="text-gray-400 text-2xl font-light">→</span>
+                             <div class="bg-green-100 text-green-800 rounded-full px-4 py-2 whitespace-nowrap">App激活</div>
+                         </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="solution-comparison" class="mb-16 md:mb-24">
+             <h2 class="text-3xl font-bold text-center mb-4">解决方案对比</h2>
+            <p class="max-w-3xl mx-auto text-gray-600 mb-12 text-center">
+                针对以上问题，有两种解决方案，各自的优缺点和工作原理如下。
+            </p>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="card solution-card p-6 md:p-8 flex flex-col">
+                    <h3 class="text-2xl font-bold mb-2">方案一：无脚本集成</h3>
+                    <p class="text-gray-500 mb-6">依赖OneLink基础跳转，实施简单。</p>
+                    <div class="space-y-4 flex-grow">
+                        <div>
+                            <h4 class="font-semibold mb-1">工作原理</h4>
+                            <p class="text-sm text-gray-600">构建OneLink模板，设置跳转至H5落地页，并将生成的OneLink链接用作广告投放链接。AF通过重定向记录点击，进行概率归因。</p>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold mb-1 text-green-600">优点</h4>
+                            <p class="text-sm text-gray-600">无需前端开发，仅后台配置，实施快。</p>
+                        </div>
+                         <div>
+                            <h4 class="font-semibold mb-1 text-red-600">缺点</h4>
+                            <p class="text-sm text-gray-600">归因精准度低，易受跳转中断影响，核心问题未完全解决。</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card solution-card p-6 md:p-8 flex flex-col">
+                    <h3 class="text-2xl font-bold mb-2">方案二：有脚本集成</h3>
+                    <p class="text-gray-500 mb-6">通过在H5页面嵌入Smart Script实现精准追踪。</p>
+                    <div class="space-y-4 flex-grow">
+                        <div>
+                            <h4 class="font-semibold mb-1">工作原理</h4>
+                            <p class="text-sm text-gray-600">JS脚本捕获广告参数，通过OneLink传递给App SDK，实现确定性归因。</p>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold mb-1 text-green-600">优点</h4>
+                            <p class="text-sm text-gray-600">归因精准度极高，彻底解决数据丢失问题，支持优化用户体验。</p>
+                        </div>
+                         <div>
+                            <h4 class="font-semibold mb-1 text-red-600">缺点</h4>
+                            <p class="text-sm text-gray-600">需要前端开发支持，嵌入JS代码。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="implementation-path" class="bg-white rounded-lg p-8 shadow-inner">
+             <h2 class="text-3xl font-bold text-center mb-10">实施路径与建议</h2>
+             <div class="grid md:grid-cols-2 gap-x-8 gap-y-12">
+                <div>
+                    <h3 class="text-xl font-bold mb-4 text-center">方案一：无脚本集成</h3>
+                    <ol class="space-y-4 list-decimal list-inside">
+                         <li>integrationweb ads intergration in appsflyer（7天点击，一天曝光归因）。</li>
+                         <li>创建OneLink模板：在AF后台新建一个OneLink模板。</li>
+                         <li>设置跳转：在模板中，将默认跳转地址设置为您的H5落地页URL。</li>
+                         <li>生成并使用链接：将此OneLink模板生成的链接，用作部分campaign广告平台的投放链接测试。</li>
+                         <li>数据观测：上线后，密切关注AF后台数据，特别是Campaign信息的完整性。</li>
+                    </ol>
+                </div>
+                 <div>
+                    <h3 class="text-xl font-bold mb-4 text-center">方案二：有脚本集成</h3>
+                     <ol class="space-y-4 list-decimal list-inside">
+                         <li>integrationweb ads intergration in appsflyer（7天点击，一天曝光归因）。
+                         <li>AF后台生成Smart Script：在OneLink模板配置中，找到Web-to-app部分，生成并复制JS代码。</li>
+                         <li>H5落地页部署：前端开发将复制的JS代码嵌入到所有H5页面的`<head>`标签内并发布。</li>
+                         <li>广告平台链接配置**：广告目标URL直接使用内嵌了脚本的H5页面地址，并确保附带完整的追踪参数（如 `utm_campaign`等）。</li>
+                         <li>数据验证：使用测试设备，完整走通“点击广告 -> 访问H5 -> 下载激活App”流程，并在AF后台验证数据是否准确。</li>
+                     </ol>
+                 </div>
+             </div>
+             <div class="mt-12 p-6 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+                <h4 class="font-bold text-amber-800">初步测试建议</h4>
+                <p class="text-amber-700 mt-2">建议，可以先采用【方案一】进行快速部署，在AF后台开启“Web Ads Integration”，并设置7天点击、1天曝光的归因窗口。同步观测数据的变化情况，以此作为评估是否需要投入开发资源实施【方案二】的依据。</p>
+             </div>
+        </section>
+    </main>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const ctx = document.getElementById('attributionLossChart').getContext('2d');
+        const attributionLossChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['成功归因', '信息丢失'],
+                datasets: [{
+                    label: '归因状态',
+                    data: [95, 5],
+                    backgroundColor: [
+                        'rgba(59, 130, 246, 0.2)',
+                        'rgba(239, 68, 68, 0.8)'
+                    ],
+                    borderColor: [
+                        'rgba(59, 130, 246, 1)',
+                        'rgba(239, 68, 68, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        enabled: true
+                    }
+                },
+                cutout: '60%'
+            },
+            plugins: [{
+                id: 'doughnut-center-text',
+                afterDraw: function(chart) {
+                    const ctx = chart.ctx;
+                    const centerX = chart.chartArea.left + chart.chartArea.width / 2;
+                    const centerY = chart.chartArea.top + chart.chartArea.height / 2;
+
+                    ctx.save();
+                    
+                    // Main Text: Percentage
+                    ctx.font = 'bold 2rem Inter';
+                    ctx.fillStyle = '#ef4444'; // red-500
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText('5%', centerX, centerY - 10);
+
+                    // Subtext: Label
+                    ctx.font = '0.8rem "Noto Sans SC"';
+                    ctx.fillStyle = '#6b7280'; // gray-500
+                    ctx.fillText('信息丢失', centerX, centerY + 20);
+                    
+                    ctx.restore();
+                }
+            }]
+        });
+
+        const navLinks = document.querySelectorAll('nav a');
+        const sections = document.querySelectorAll('main section');
+
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (pageYOffset >= sectionTop - 80) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href').includes(current)) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>
